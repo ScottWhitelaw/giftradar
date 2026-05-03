@@ -22,7 +22,6 @@ interface Props {
 
 export function SettingsClient({ userId, userEmail, settings }: Props) {
   const [email, setEmail] = useState(settings?.email ?? userEmail ?? '')
-  const [phone, setPhone] = useState(settings?.phone ?? '')
   const [reminderDays, setReminderDays] = useState<number[]>(
     settings?.reminder_days ?? [30, 14, 7]
   )
@@ -42,12 +41,6 @@ export function SettingsClient({ userId, userEmail, settings }: Props) {
     setError(null)
     setSuccess(false)
 
-    if (phone && !/^\+[1-9]\d{7,14}$/.test(phone)) {
-      setError('Phone number must be in international format, e.g. +447712345678')
-      setLoading(false)
-      return
-    }
-
     if (reminderDays.length === 0) {
       setError('Select at least one reminder interval.')
       setLoading(false)
@@ -55,16 +48,12 @@ export function SettingsClient({ userId, userEmail, settings }: Props) {
     }
 
     const supabase = createClient()
-    const payload = {
-      user_id: userId,
-      email: email || null,
-      phone: phone || null,
-      reminder_days: reminderDays,
-    }
-
     const { error: upsertError } = await supabase
       .from('user_settings')
-      .upsert(payload, { onConflict: 'user_id' })
+      .upsert(
+        { user_id: userId, email: email || null, reminder_days: reminderDays },
+        { onConflict: 'user_id' }
+      )
 
     if (upsertError) {
       setError(upsertError.message)
@@ -78,39 +67,25 @@ export function SettingsClient({ userId, userEmail, settings }: Props) {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      {/* Notifications */}
       <Card>
         <CardHeader>
-          <CardTitle>Notification channels</CardTitle>
+          <CardTitle>Email notifications</CardTitle>
           <p className="text-sm text-gray-500 mt-1">
             Where should we send birthday reminders?
           </p>
         </CardHeader>
 
-        <div className="space-y-4">
-          <Input
-            id="email"
-            type="email"
-            label="Email address"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            hint="We'll send HTML reminder emails to this address."
-          />
-
-          <Input
-            id="phone"
-            type="tel"
-            label="Phone number (optional)"
-            placeholder="+447712345678"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            hint="International format required. SMS sent via Twilio."
-          />
-        </div>
+        <Input
+          id="email"
+          type="email"
+          label="Email address"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          hint="We'll send reminder emails to this address."
+        />
       </Card>
 
-      {/* Reminder timing */}
       <Card>
         <CardHeader>
           <CardTitle>Reminder timing</CardTitle>
@@ -121,10 +96,7 @@ export function SettingsClient({ userId, userEmail, settings }: Props) {
 
         <div className="space-y-3">
           {REMINDER_OPTIONS.map(({ value, label }) => (
-            <label
-              key={value}
-              className="flex items-center gap-3 cursor-pointer group"
-            >
+            <label key={value} className="flex items-center gap-3 cursor-pointer group">
               <div
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
                   reminderDays.includes(value)
@@ -139,10 +111,7 @@ export function SettingsClient({ userId, userEmail, settings }: Props) {
                   </svg>
                 )}
               </div>
-              <span
-                className="text-sm text-gray-700 select-none"
-                onClick={() => toggleDay(value)}
-              >
+              <span className="text-sm text-gray-700 select-none" onClick={() => toggleDay(value)}>
                 {label}
               </span>
             </label>

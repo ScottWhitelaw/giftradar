@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendBirthdayReminderEmail } from '@/lib/resend'
-import { sendBirthdayReminderSMS } from '@/lib/twilio'
 import { getDaysUntilBirthday } from '@/lib/utils'
 import { Contact, UserSettings } from '@/types'
 
@@ -9,7 +8,6 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret to prevent unauthorised calls
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
@@ -17,7 +15,6 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient()
 
-  // Fetch all contacts
   const { data: contacts, error: contactsError } = await supabase
     .from('contacts')
     .select('*')
@@ -27,7 +24,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
   }
 
-  // Fetch all user settings
   const { data: allSettings, error: settingsError } = await supabase
     .from('user_settings')
     .select('*')
@@ -37,13 +33,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 
-  // Build a map: user_id -> settings
   const settingsMap = new Map<string, UserSettings>(
     (allSettings || []).map((s: UserSettings) => [s.user_id, s])
   )
 
   let emailsSent = 0
-  let smsSent = 0
   let errors = 0
 
   for (const contact of (contacts || []) as Contact[]) {
@@ -55,7 +49,6 @@ export async function GET(request: NextRequest) {
 
     if (!reminderDays.includes(daysUntil)) continue
 
-    // Send email
     if (settings.email) {
       try {
         await sendBirthdayReminderEmail({
@@ -70,23 +63,8 @@ export async function GET(request: NextRequest) {
         errors++
       }
     }
-
-    // Send SMS
-    if (settings.phone) {
-      try {
-        await sendBirthdayReminderSMS({
-          to: settings.phone,
-          contactName: contact.full_name,
-          daysUntil,
-        })
-        smsSent++
-      } catch (err) {
-        console.error(`SMS failed for ${contact.full_name}:`, err)
-        errors++
-      }
-    }
   }
 
-  console.log(`Cron complete: ${emailsSent} emails, ${smsSent} SMS, ${errors} errors`)
-  return NextResponse.json({ emailsSent, smsSent, errors })
+  console.log(`Cron complete: ${emailsSent} emails, ${errors} errors`)
+  return NextResponse.json({ emailsSent, errors })
 }
