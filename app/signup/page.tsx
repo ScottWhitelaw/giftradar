@@ -31,29 +31,47 @@ export default function SignupPage() {
     }
 
     setLoading(true)
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      })
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        setError(error.message)
+        return
+      }
+
+      // Email confirmation disabled — session returned immediately
+      if (data.session) {
+        router.push('/dashboard')
+        router.refresh()
+        return
+      }
+
+      // Account already exists but unconfirmed, or confirmation still on
+      if (data.user && !data.session) {
+        // Try signing in directly in case account already exists
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+        if (signInData.session) {
+          router.push('/dashboard')
+          router.refresh()
+          return
+        }
+        if (signInError) {
+          setNeedsConfirmation(true)
+          return
+        }
+      }
+
+      setNeedsConfirmation(true)
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    // If we got a session back, email confirmation is disabled — go straight to dashboard
-    if (data.session) {
-      router.push('/dashboard')
-      router.refresh()
-      return
-    }
-
-    // Otherwise show the "check your email" screen
-    setNeedsConfirmation(true)
-    setLoading(false)
   }
 
   if (needsConfirmation) {
