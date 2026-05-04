@@ -54,11 +54,19 @@ The estimated price must fall within the budget range: ${c.budget_range}.`
     })
 
     const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    const suggestions: GiftSuggestion[] = JSON.parse(text)
+
+    let suggestions: GiftSuggestion[]
+    try {
+      suggestions = JSON.parse(text)
+    } catch {
+      console.error('JSON parse failed. Raw response:', text)
+      return NextResponse.json({ error: `AI returned invalid response: ${text.slice(0, 200)}` }, { status: 500 })
+    }
 
     return NextResponse.json({ suggestions })
   } catch (err) {
-    console.error('Gift suggestion error:', err)
-    return NextResponse.json({ error: 'Failed to generate suggestions. Please try again.' }, { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('Gift suggestion error:', message)
+    return NextResponse.json({ error: `Claude API error: ${message}` }, { status: 500 })
   }
 }
