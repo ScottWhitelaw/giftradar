@@ -107,7 +107,7 @@ export function ContactForm({ contact, userId }: Props) {
       return
     }
 
-    router.push('/contacts')
+    router.push('/dashboard/contacts')
     router.refresh()
   }
 
@@ -123,7 +123,7 @@ export function ContactForm({ contact, userId }: Props) {
       setLoading(false)
       return
     }
-    router.push('/contacts')
+    router.push('/dashboard/contacts')
     router.refresh()
   }
 

@@ -69,7 +69,7 @@ export function ContactsClient({ contacts }: { contacts: ContactWithDaysUntil[] 
               </button>
 
               <Link
-                href={`/contacts/${contact.id}/edit`}
+                href={`/dashboard/contacts/${contact.id}/edit`}
                 className="p-2 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors"
                 title="Edit"
               >

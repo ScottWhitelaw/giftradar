@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup')
+  const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isPublicRoute = isAuthPage || pathname === '/' || pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
 

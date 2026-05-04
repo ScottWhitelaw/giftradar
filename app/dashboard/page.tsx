@@ -19,7 +19,6 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Upcoming Birthdays</h1>
         <p className="text-gray-500 mt-1">Birthdays in the next 90 days</p>
@@ -35,7 +34,7 @@ export default async function DashboardPage() {
             Add some contacts to start tracking birthdays.
           </p>
           <Link
-            href="/contacts/new"
+            href="/dashboard/contacts/new"
             className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-purple-700 transition-colors"
           >
             <span>+</span> Add a contact
@@ -43,11 +42,8 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {upcoming.length > 0 && (
-        <DashboardClient contacts={upcoming} />
-      )}
+      {upcoming.length > 0 && <DashboardClient contacts={upcoming} />}
 
-      {/* Stats strip */}
       {(contacts?.length ?? 0) > 0 && (
         <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
           <StatCard label="Total contacts" value={contacts?.length ?? 0} icon="👥" />

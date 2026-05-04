@@ -9,8 +9,8 @@ import { Logo } from './Logo'
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
-  { href: '/contacts', label: 'Contacts', icon: '👥' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/dashboard/contacts', label: 'Contacts', icon: '👥' },
+  { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
 ]
 
 export function Navbar() {

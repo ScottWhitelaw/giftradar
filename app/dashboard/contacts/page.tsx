@@ -24,7 +24,7 @@ export default async function ContactsPage() {
           <p className="text-gray-500 mt-1">{enriched.length} {enriched.length === 1 ? 'person' : 'people'} saved</p>
         </div>
         <Link
-          href="/contacts/new"
+          href="/dashboard/contacts/new"
           className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl font-medium text-sm hover:bg-purple-700 transition-colors shadow-sm"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +44,7 @@ export default async function ContactsPage() {
             Add your first contact to track their birthday and get personalised gift ideas.
           </p>
           <Link
-            href="/contacts/new"
+            href="/dashboard/contacts/new"
             className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-purple-700 transition-colors"
           >
             <span>+</span> Add your first contact
