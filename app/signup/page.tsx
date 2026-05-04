@@ -2,18 +2,20 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/layout/Logo'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
 export default function SignupPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -30,7 +32,7 @@ export default function SignupPage() {
 
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
@@ -42,11 +44,19 @@ export default function SignupPage() {
       return
     }
 
-    setSuccess(true)
+    // If we got a session back, email confirmation is disabled — go straight to dashboard
+    if (data.session) {
+      router.push('/dashboard')
+      router.refresh()
+      return
+    }
+
+    // Otherwise show the "check your email" screen
+    setNeedsConfirmation(true)
     setLoading(false)
   }
 
-  if (success) {
+  if (needsConfirmation) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
@@ -122,7 +132,7 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" className="w-full" size="lg" loading={loading}>
-              Create account
+              {loading ? 'Creating account…' : 'Create account'}
             </Button>
           </form>
 
