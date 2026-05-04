@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { enrichContactsWithDays } from '@/lib/utils'
 import { Contact } from '@/types'
 import Link from 'next/link'
-import { DashboardClient } from './DashboardClient'
+import { DashboardClient } from '@/components/dashboard/DashboardClient'
 
 export default async function DashboardPage() {
   const supabase = createClient()

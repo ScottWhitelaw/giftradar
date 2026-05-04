@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Contact } from '@/types'
 import { enrichContactsWithDays } from '@/lib/utils'
 import Link from 'next/link'
-import { ContactsClient } from './ContactsClient'
+import { ContactsClient } from '@/components/contacts/ContactsClient'
 
 export default async function ContactsPage() {
   const supabase = createClient()
