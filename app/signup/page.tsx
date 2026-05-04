@@ -67,7 +67,7 @@ export default function SignupPage() {
       }
 
       setNeedsConfirmation(true)
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
